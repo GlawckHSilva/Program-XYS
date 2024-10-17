@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Teste Kanban</title>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<style>
+		#TKanban {
+			overflow-x: auto;
+			white-space: nowrap;
+		}
+
+		.selected {
+			border: 2px solid red;
+		}
+
+		.coluna {
+			width: 300px;
+			background-color: #f4f5f7;
+			border-radius: 8px;
+			margin-right: 15px;
+			padding: 10px;
+			flex-shrink: 0;
+		}
+
+		.cartao {
+			background-color: #ffffff;
+			border-radius: 8px;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+			padding: 8px 12px;
+			margin-bottom: 10px;
+		}
+	</style>
+</head>
+<body class="container-fluid">
+	<div class="d-flex mb-3">
+		<div class="form-check me-2">
+			<input type="radio" name="cor" value="red" class="form-check-input" id="corRed">
+			<label for="corRed" class="form-check-label text-danger">RED</label>
+		</div>
+		<div class="form-check me-2">
+			<input type="radio" name="cor" value="blue" class="form-check-input" id="corBlue">
+			<label for="corBlue" class="form-check-label text-primary">BLUE</label>
+		</div>
+		<div class="form-check me-2">
+			<input type="radio" name="cor" value="green" class="form-check-input" id="corGreen">
+			<label for="corGreen" class="form-check-label text-success">GREEN</label>
+		</div>
+		<div class="form-check">
+			<input type="radio" name="cor" value="lightgray" class="form-check-input" id="corDefault" checked>
+			<label for="corDefault" class="form-check-label">DEFAULT</label>
+		</div>
+	</div>
+	<div class="mb-3">
+		<input type="text" id="nomeCartao" class="form-control d-inline-block w-auto" placeholder="Nome do cartão">
+		<input type="date" id="dataInicio" class="form-control d-inline-block w-auto" placeholder="Data de Início">
+		<input type="date" id="dataPrazo" class="form-control d-inline-block w-auto" placeholder="Data de Prazo">
+		<textarea id="descricao" class="form-control d-inline-block w-auto" placeholder="Descrição do cartão" rows="2"></textarea>
+		<button type="button" id="criar" class="btn btn-primary ms-2" onclick="criarcartao();">Criar <i class="fa-solid fa-plus"></i></button>
+	</div>
+	<div class="mb-4">
+		<input type="text" id="titulo" class="form-control d-inline-block w-auto" maxlength="100" placeholder="Título da Coluna">
+		<button type="button" id="criarColuna" class="btn btn-primary ms-2" onclick="criarcoluna();">Criar Coluna <i class="fa-solid fa-plus"></i></button>
+	</div>
+	<div id="TKanban" class="d-flex">
+		<div class="coluna" id="Segunda-Feira" ondrop="drop(event,this);" ondragover="allowDrop(event);" onclick="selecionarColuna(this);">
+			<h3 class="fw-bold">Segunda-Feira</h3>
+			<button class="btn-close position-absolute top-0 end-0" aria-label="Close" onclick="excluirColuna(event, this)"></button>
+		</div>
+		<div class="coluna" id="Segunda-Feira" ondrop="drop(event,this);" ondragover="allowDrop(event);" onclick="selecionarColuna(this);">
+			<h3 class="fw-bold">Segunda-Feira</h3>
+			<button class="btn-close position-absolute top-0 end-0" aria-label="Close" onclick="excluirColuna(event, this)"></button>
+		</div>
+		<div class="coluna" id="Segunda-Feira" ondrop="drop(event,this);" ondragover="allowDrop(event);" onclick="selecionarColuna(this);">
+			<h3 class="fw-bold">Segunda-Feira</h3>
+			<button class="btn-close position-absolute top-0 end-0" aria-label="Close" onclick="excluirColuna(event, this)"></button>
+		</div>
+		<div class="coluna" id="Segunda-Feira" ondrop="drop(event,this);" ondragover="allowDrop(event);" onclick="selecionarColuna(this);">
+			<h3 class="fw-bold">Segunda-Feira</h3>
+			<button class="btn-close position-absolute top-0 end-0" aria-label="Close" onclick="excluirColuna(event, this)"></button>
+		</div>
+		<div class="coluna" id="Segunda-Feira" ondrop="drop(event,this);" ondragover="allowDrop(event);" onclick="selecionarColuna(this);">
+			<h3 class="fw-bold">Segunda-Feira</h3>
+			<button class="btn-close position-absolute top-0 end-0" aria-label="Close" onclick="excluirColuna(event, this)"></button>
+		</div>
+	</div>
+
+	<script>
+		var i = 0;
+		var j = 0;
+		var colunas = 5;
+		var colunaSelecionada = null;
+		
+		$(document).ready(function() {
+			colunas = 5;
+		});
+		
+		function selecionarColuna(coluna) {
+			$(".coluna").removeClass("selected");
+			coluna.classList.add("selected");
+			colunaSelecionada = coluna;
+		}
+		
+		function criarcartao() {
+			if (!colunaSelecionada) {
+				alert("Selecione uma coluna primeiro!");
+				return;
+			}
+			
+			i++;
+			var nomeCartao = document.getElementById("nomeCartao").value;
+			var dataInicio = document.getElementById("dataInicio").value;
+			var dataPrazo = document.getElementById("dataPrazo").value;
+			var descricao = document.getElementById("descricao").value;
+			var listaCores = document.querySelectorAll('[name="cor"]');
+			var cor;
+			for (var k = 0; k < listaCores.length; k++) {
+				if (listaCores[k].checked) {
+					cor = listaCores[k].value;
+					break;
+				}
+			}
+			colunaSelecionada.innerHTML += `<div class="cartao" style="background-color:${cor}" id="cartao_${i}" draggable="true" ondragstart="drag(event);">
+				<h5>${nomeCartao}</h5>
+				<p><strong>Início:</strong> ${dataInicio}</p>
+				<p><strong>Prazo:</strong> ${dataPrazo}</p>
+				<p>${descricao}</p>
+				<button class="btn-close position-absolute top-0 end-0" aria-label="Close" onclick="excluirCartao(event, this)"></button>
+			</div>`;
+		}
+		
+		function criarcoluna() {
+			j++;
+			var listaCores = document.querySelectorAll('[name="cor"]');
+			var cor;
+			for (var k = 0; k < listaCores.length; k++) {
+				if (listaCores[k].checked) {
+					cor = listaCores[k].value;
+					break;
+				}
+			}
+			var titulo = document.getElementById("titulo").value;
+			document.getElementById("TKanban").innerHTML += `<div class="coluna" style="background-color:${cor}" id="coluna_${titulo}${j}" ondrop="drop(event,this);" ondragover="allowDrop(event);" onclick="selecionarColuna(this);">
+				<h3 class="fw-bold">${titulo}</h3>
+				<button class="btn-close position-absolute top-0 end-0" aria-label="Close" onclick="excluirColuna(event, this)"></button>
+			</div>`;
+		}
+		
+		function allowDrop(ev) {
+			ev.preventDefault();
+		}
+		
+		function drag(ev) {
+			ev.dataTransfer.setData("text", ev.target.id);
+		}
+		
+		function drop(ev, el) {
+			var data = ev.dataTransfer.getData("text");
+			el.appendChild(document.getElementById(data));
+		}
+
+		function excluirColuna(event, button) {
+			event.stopPropagation(); 
+			var coluna = button.parentElement;
+			coluna.remove();
+		}
+
+		function excluirCartao(event, button) {
+			event.stopPropagation();
+			var cartao = button.parentElement;
+			cartao.remove();
+		}
+	</script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
